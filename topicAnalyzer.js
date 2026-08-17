@@ -336,8 +336,10 @@ function toGerund(action) {
     gerund = first.slice(0, -1) + "ing";
   } else if (/[aeiou]p$/.test(first) || /[^aeiou][aeiou][^aeiou]$/.test(first)) {
     // CVC pattern — double the last consonant (run→running, sit→sitting)
-    // But be conservative — only double short words
-    if (first.length <= 4) gerund = first + first.slice(-1) + "ing";
+    // But be conservative — only double short words AND only for 1-syllable words
+    // "edit" → "editing" (not "editting"), "run" → "running", "sit" → "sitting"
+    const doubles = ["run", "sit", "cut", "put", "hit", "fit", "get", "let", "set", "win", "spin", "stop", "plan", "drop", "shop", "clip", "snap", "step", "map", "tip", "top", "pop", "mop", "hop", "log", "blog", "flag", "tag", "dig", "beg", "jam", "slam", "swap", "pat", "bat", "rat", "chat", "flat", "grin", "shut", "slit", "split"];
+    if (doubles.includes(first)) gerund = first + first.slice(-1) + "ing";
     else gerund = first + "ing";
   } else {
     gerund = first + "ing";
