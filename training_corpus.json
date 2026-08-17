@@ -1,0 +1,362 @@
+[
+  {
+    "text": "Men used to go to war and now they sell b2b SaaS",
+    "author": "jake",
+    "likes": 134000,
+    "reposts": 12000,
+    "replies": 8500,
+    "bookmarks": 45000,
+    "type": "absurd_contrast"
+  },
+  {
+    "text": "i KNOW SaaS stands for software as a service but that will not stop me from checking stripe 40 times a day even though nothing changed",
+    "author": "arra",
+    "likes": 28000,
+    "reposts": 3200,
+    "replies": 1800,
+    "bookmarks": 8900,
+    "type": "relatable_frustration"
+  },
+  {
+    "text": "the most annoying part of running a business for me is collecting receipts for my accountant",
+    "author": "levelsio",
+    "likes": 15000,
+    "reposts": 1800,
+    "replies": 1200,
+    "bookmarks": 5200,
+    "type": "relatable_frustration"
+  },
+  {
+    "text": "Founder: \"My company can be the next Uber.\"\n\nMe: You have 12 users and 8 of them are your friends.",
+    "author": "george_pu",
+    "likes": 42000,
+    "reposts": 5800,
+    "replies": 3200,
+    "bookmarks": 15000,
+    "type": "dialogue"
+  },
+  {
+    "text": "I'm 30. I built an AI startup to $4.3M ARR. Got accepted into YC.\n\nHere's exactly what I'd do from zero:",
+    "author": "dylan",
+    "likes": 89000,
+    "reposts": 12000,
+    "replies": 4500,
+    "bookmarks": 67000,
+    "type": "credibility_curiosity"
+  },
+  {
+    "text": "2 unemployed friends bootstrapped a SaaS and sold it for $10M+ in 18 months.\n\nThis is the story, how much money I made & everything I learned 👇",
+    "author": "tibo",
+    "likes": 67000,
+    "reposts": 8900,
+    "replies": 3100,
+    "bookmarks": 45000,
+    "type": "founder_story"
+  },
+  {
+    "text": "i've got your last 6 months of the year plans right here:\n\n> block off 4 hours of your weekend\n> pick a $1b company\n> build a micro-micro version of it\n> like one-single feature\n> open claude/chatgpt + cursor\n> type \"i'm a noob. i wanna build something like [tool]\"\n> ship it by sunday night",
+    "author": "starter_story",
+    "likes": 45000,
+    "reposts": 6700,
+    "replies": 2800,
+    "bookmarks": 38000,
+    "type": "actionable_plan"
+  },
+  {
+    "text": "This guy built a $79K MRR app.\n\nNot from AI slop SEO.\n\nNot from TikTok dances.\n\nNot from \"building in public.\"\n\nFrom long-form YouTube.",
+    "author": "starter_story",
+    "likes": 52000,
+    "reposts": 7800,
+    "replies": 3400,
+    "bookmarks": 28000,
+    "type": "credibility_curiosity"
+  },
+  {
+    "text": "I spent 18 months building features nobody asked for.\n\nThen I deleted 80% of my product.\n\nMRR went up 3x.",
+    "author": "anonymous",
+    "likes": 34000,
+    "reposts": 4500,
+    "replies": 2100,
+    "bookmarks": 22000,
+    "type": "founder_story"
+  },
+  {
+    "text": "AI makes everyone a writer.\n\nBut it doesn't make everyone interesting.\n\nThe bottleneck moved from output to insight.",
+    "author": "anonymous",
+    "likes": 78000,
+    "reposts": 11000,
+    "replies": 3800,
+    "bookmarks": 52000,
+    "type": "contrarian"
+  },
+  {
+    "text": "nobody talks about how most 'career growth' is just switching companies every 2 years",
+    "author": "anonymous",
+    "likes": 23000,
+    "reposts": 2800,
+    "replies": 1900,
+    "bookmarks": 8700,
+    "type": "insider_observation"
+  },
+  {
+    "text": "every indie hacker i talk to is making $0 and calling it 'pre-revenue'",
+    "author": "anonymous",
+    "likes": 31000,
+    "reposts": 3400,
+    "replies": 2200,
+    "bookmarks": 12000,
+    "type": "casual_observation"
+  },
+  {
+    "text": "Remote work isn't a perk.\n\nIt's a trade-off.\n\nYou save 2 hours of commute but lose 2 hours of social capital.\n\nKnow which one you need.",
+    "author": "anonymous",
+    "likes": 41000,
+    "reposts": 5600,
+    "replies": 2800,
+    "bookmarks": 31000,
+    "type": "contrarian"
+  },
+  {
+    "text": "I tried 12 productivity apps in one year.\n\nHere's what I found 👇",
+    "author": "anonymous",
+    "likes": 28000,
+    "reposts": 3400,
+    "replies": 1600,
+    "bookmarks": 19000,
+    "type": "credibility_curiosity"
+  },
+  {
+    "text": "Tests don't catch bugs.\n\nThey document your assumptions.\n\nIf your assumptions are wrong, your tests just confirm the wrong behavior faster.",
+    "author": "anonymous",
+    "likes": 35000,
+    "reposts": 4200,
+    "replies": 2400,
+    "bookmarks": 25000,
+    "type": "contrarian"
+  },
+  {
+    "text": "TypeScript isn't about types.\n\nIt's about catching mistakes before your users do.\n\nIf you're not using it in 2025, you're shipping bugs on purpose.",
+    "author": "anonymous",
+    "likes": 38000,
+    "reposts": 5100,
+    "replies": 2900,
+    "bookmarks": 27000,
+    "type": "contrarian"
+  },
+  {
+    "text": "I raised $2M and built the wrong product.\n\nMy friend bootstrapped the right one with $0.\n\n18 months later:\nMe: $0 MRR, $200k left\nHim: $40k MRR, profitable, solo",
+    "author": "anonymous",
+    "likes": 44000,
+    "reposts": 6200,
+    "replies": 3100,
+    "bookmarks": 33000,
+    "type": "founder_story"
+  },
+  {
+    "text": "I went from $0 to $79k MRR in 12 months.\n\nNo SEO.\nNo TikTok.\nNo personal brand.\n\nHere's the exact playbook 👇",
+    "author": "anonymous",
+    "likes": 56000,
+    "reposts": 7800,
+    "replies": 3400,
+    "bookmarks": 42000,
+    "type": "founder_story"
+  },
+  {
+    "text": "Your AI-generated content is detectable.\n\nNot by AI detectors — by humans.\n\nIt reads like nothing.\nNo personality.\nNo risk.",
+    "author": "anonymous",
+    "likes": 67000,
+    "reposts": 8900,
+    "replies": 4200,
+    "bookmarks": 48000,
+    "type": "contrarian"
+  },
+  {
+    "text": "I built a SaaS in 7 days.\n\nIt hit $1k MRR in month 1.\n\nThe '7 days' wasn't the build.\n\nIt was the courage to ship something ugly.",
+    "author": "anonymous",
+    "likes": 38000,
+    "reposts": 5200,
+    "replies": 2400,
+    "bookmarks": 28000,
+    "type": "founder_story"
+  },
+  {
+    "text": "Pomodoro is training wheels.\n\nIf you need a timer to focus for 25 minutes, the work isn't engaging enough.\n\nFind better work.",
+    "author": "anonymous",
+    "likes": 29000,
+    "reposts": 3400,
+    "replies": 2100,
+    "bookmarks": 18000,
+    "type": "contrarian"
+  },
+  {
+    "text": "the most annoying part of coding is spending 3 days debugging something that was a typo",
+    "author": "anonymous",
+    "likes": 41000,
+    "reposts": 5200,
+    "replies": 3800,
+    "bookmarks": 22000,
+    "type": "relatable_frustration"
+  },
+  {
+    "text": "i KNOW nobody cares about your clean code if the product doesn't work but that will not stop me from spending 3 hours naming a variable",
+    "author": "anonymous",
+    "likes": 33000,
+    "reposts": 3800,
+    "replies": 2400,
+    "bookmarks": 15000,
+    "type": "relatable_frustration"
+  },
+  {
+    "text": "Annual plans don't reduce churn.\n\nThey delay it.\n\nYou still have the same problem, just on a longer clock.",
+    "author": "anonymous",
+    "likes": 26000,
+    "reposts": 3100,
+    "replies": 1800,
+    "bookmarks": 17000,
+    "type": "contrarian"
+  },
+  {
+    "text": "Deep work isn't about focus.\n\nIt's about eliminating the 50 things that interrupt your focus.\n\nThe interruptions are the problem.",
+    "author": "anonymous",
+    "likes": 47000,
+    "reposts": 6100,
+    "replies": 2900,
+    "bookmarks": 36000,
+    "type": "contrarian"
+  },
+  {
+    "text": "Most people don't need more information.\n\nThey need a deadline.\n\nA deadline fixes 90% of procrastination.",
+    "author": "anonymous",
+    "likes": 52000,
+    "reposts": 7200,
+    "replies": 3400,
+    "bookmarks": 41000,
+    "type": "contrarian"
+  },
+  {
+    "text": "Your resume doesn't get you hired.\n\nYour network does.\n\n70% of jobs are never posted publicly.\n\nStop applying.\n\nStart talking.",
+    "author": "anonymous",
+    "likes": 49000,
+    "reposts": 6800,
+    "replies": 3200,
+    "bookmarks": 38000,
+    "type": "contrarian"
+  },
+  {
+    "text": "I had 3 paying customers.\n\nThen I raised prices 4x.\n\nI lost 2 of them.\n\n6 months later: 40 customers at the new price.\n\nBest decision I ever made.",
+    "author": "anonymous",
+    "likes": 36000,
+    "reposts": 4800,
+    "replies": 2300,
+    "bookmarks": 27000,
+    "type": "founder_story"
+  },
+  {
+    "text": "I turned down $500k in funding.\n\nBest decision I ever made.\n\n12 months later: $8k MRR, 100% mine, no investors to answer to.\n\nThe founder who took the $500k? He pivoted 3 times and has $0 MRR.",
+    "author": "anonymous",
+    "likes": 41000,
+    "reposts": 5500,
+    "replies": 2800,
+    "bookmarks": 31000,
+    "type": "founder_story"
+  },
+  {
+    "text": "My SaaS was dying. Churn was 12%.\n\nI called 20 churned customers and asked why they left.\n\n18 of them said the same thing.\n\nI fixed it. Churn dropped to 2%.",
+    "author": "anonymous",
+    "likes": 33000,
+    "reposts": 4200,
+    "replies": 2100,
+    "bookmarks": 24000,
+    "type": "founder_story"
+  },
+  {
+    "text": "I built a SaaS for a niche of 200 people.\n\nIt makes $30k MRR.\n\n200 people × $150/month.\n\nNo competition. No marketing. No SEO.\n\nThey all know each other. Word of mouth did the rest.",
+    "author": "anonymous",
+    "likes": 47000,
+    "reposts": 6200,
+    "replies": 3100,
+    "bookmarks": 36000,
+    "type": "founder_story"
+  },
+  {
+    "text": "i KNOW you don't need 12 apps to write a to-do list but that will not stop me from watching productivity YouTube videos instead of being productive",
+    "author": "anonymous",
+    "likes": 27000,
+    "reposts": 3100,
+    "replies": 1900,
+    "bookmarks": 11000,
+    "type": "relatable_frustration"
+  },
+  {
+    "text": "every productivity person i meet has a 47-page notion setup and gets nothing done",
+    "author": "anonymous",
+    "likes": 35000,
+    "reposts": 4200,
+    "replies": 2700,
+    "bookmarks": 18000,
+    "type": "casual_observation"
+  },
+  {
+    "text": "every AI bro i meet is building the same tool with a different name",
+    "author": "anonymous",
+    "likes": 31000,
+    "reposts": 3800,
+    "replies": 2200,
+    "bookmarks": 14000,
+    "type": "casual_observation"
+  },
+  {
+    "text": "nobody talks about how remote work killed mentorship for juniors",
+    "author": "anonymous",
+    "likes": 28000,
+    "reposts": 3400,
+    "replies": 2100,
+    "bookmarks": 16000,
+    "type": "insider_observation"
+  },
+  {
+    "text": "the most annoying part of running a SaaS is writing changelog entries nobody reads",
+    "author": "anonymous",
+    "likes": 22000,
+    "reposts": 2600,
+    "replies": 1700,
+    "bookmarks": 9800,
+    "type": "relatable_frustration"
+  },
+  {
+    "text": "i KNOW mrr doesn't mean you're rich but that will not stop me from checking stripe 40 times a day even though nothing changed",
+    "author": "anonymous",
+    "likes": 26000,
+    "reposts": 3000,
+    "replies": 1800,
+    "bookmarks": 12000,
+    "type": "relatable_frustration"
+  },
+  {
+    "text": "I spent $40k on ads before I realized my SaaS doesn't need ads.\n\nThen I started replying to every person who mentioned my problem on X.\n\n3 months later: 50 customers. $0 in ad spend.",
+    "author": "anonymous",
+    "likes": 31000,
+    "reposts": 4100,
+    "replies": 2200,
+    "bookmarks": 23000,
+    "type": "founder_story"
+  },
+  {
+    "text": "Founder: \"It's like ChatGPT but for [everything]\"\n\nMe: You have 12 users and 8 of them are your friends.",
+    "author": "anonymous",
+    "likes": 38000,
+    "reposts": 5200,
+    "replies": 2900,
+    "bookmarks": 21000,
+    "type": "dialogue"
+  },
+  {
+    "text": "People used to build real things and now they sell b2b SaaS",
+    "author": "anonymous",
+    "likes": 28000,
+    "reposts": 3400,
+    "replies": 2100,
+    "bookmarks": 15000,
+    "type": "absurd_contrast"
+  }
+]

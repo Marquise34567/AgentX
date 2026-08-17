@@ -1,0 +1,34 @@
+{
+  "name": "agentx",
+  "version": "2.0.0",
+  "description": "Autonomous X engagement engine — analyzes, rewrites, and grades posts to maximize real engagement. Learns from feedback.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "worker": "node -e \"require('./learningWorker').startWorker({intervalMs:5000})\"",
+    "test": "node _test_engagement.js",
+    "test:viral": "node _test_viral.js",
+    "test:smart": "node _test_smart.js",
+    "test:all": "node _test_engagement.js && node _test_viral.js && node _test_smart.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "x",
+    "twitter",
+    "engagement",
+    "algorithm",
+    "viral",
+    "railway",
+    "ai",
+    "learning"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "playwright": "^1.62.1",
+    "puppeteer": "^25.7.0"
+  }
+}

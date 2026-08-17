@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AgentX — X Engagement Engine</title>
+<style>
+  :root {
+    --bg: #000000;
+    --bubble-user: #0b84fe;
+    --bubble-bot: #1c1c1e;
+    --bubble-bot-border: #2c2c2e;
+    --text: #ffffff;
+    --text-dim: #8e8e93;
+    --text-user: #ffffff;
+    --green: #30d158;
+    --red: #ff453a;
+    --yellow: #ffd60a;
+    --accent: #0b84fe;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Header — minimal iMessage style */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .header-back {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--accent); font-size: 20px; cursor: pointer;
+    display: none;
+  }
+  .header-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #0b84fe, #5e5ce6);
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 14px; color: #fff;
+  }
+  .header-info { text-align: center; }
+  .header-info h1 {
+    font-size: 15px; font-weight: 600; letter-spacing: -0.2px;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .header-info .sub {
+    font-size: 11px; color: var(--text-dim);
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .header-info .sub .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+  }
+
+  /* Chat area */
+  main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scroll-behavior: smooth;
+  }
+
+  /* Date separator */
+  .date-sep {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 500;
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Message rows — iMessage style */
+  .msg-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+    margin-top: 4px;
+  }
+  .msg-row.user { align-self: flex-end; align-items: flex-end; }
+  .msg-row.bot { align-self: flex-start; align-items: flex-start; }
+
+  /* Bubbles */
+  .bubble {
+    padding: 8px 14px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    position: relative;
+    max-width: 100%;
+  }
+  .bubble.user {
+    background: var(--bubble-user);
+    color: var(--text-user);
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.bot {
+    background: var(--bubble-bot);
+    color: var(--text);
+    border: 1px solid var(--bubble-bot-border);
+    border-bottom-left-radius: 4px;
+  }
+
+  /* Consecutive messages from same sender — tighter grouping */
+  .msg-row.consecutive { margin-top: 2px; }
+  .msg-row.consecutive .bubble.user { border-bottom-right-radius: 18px; }
+  .msg-row.consecutive .bubble.bot { border-bottom-left-radius: 18px; }
+  .msg-row.last-in-group .bubble.user { border-bottom-right-radius: 4px; }
+  .msg-row.last-in-group .bubble.bot { border-bottom-left-radius: 4px; }
+
+  /* Read receipts */
+  .receipt {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    padding: 0 4px;
+  }
+
+  /* Bot bubble content styling */
+  .bubble.bot h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .bubble.bot h3 + blockquote { margin-bottom: 8px; }
+  .bubble.bot p { margin: 6px 0; }
+  .bubble.bot ul, .bubble.bot ol { margin: 6px 0 6px 18px; }
+  .bubble.bot li { margin: 3px 0; }
+  .bubble.bot strong { color: #fff; font-weight: 700; }
+  .bubble.bot em { color: var(--text-dim); font-style: italic; }
+  .bubble.bot code {
+    font-family: var(--mono); background: rgba(255,255,255,0.08);
+    padding: 1px 5px; border-radius: 4px; font-size: 13px; color: #64d2ff;
+  }
+  .bubble.bot pre {
+    background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+    padding: 10px 12px; overflow-x: auto; margin: 8px 0;
+  }
+  .bubble.bot pre code {
+    background: none; color: var(--text); padding: 0; font-size: 13px; white-space: pre-wrap;
+  }
+  .code-block-wrap { position: relative; margin: 8px 0; }
+  .code-block-wrap pre { margin: 0; padding-right: 100px; }
+  .code-actions {
+    position: absolute; top: 6px; right: 6px;
+    display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s;
+  }
+  .code-block-wrap:hover .code-actions { opacity: 1; }
+  .copy-btn, .schedule-btn {
+    background: rgba(255,255,255,0.1); color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
+    padding: 3px 10px; font-size: 11px; font-family: var(--mono);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .copy-btn:hover, .schedule-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .copy-btn.copied, .schedule-btn.copied { background: var(--accent); color: #000; border-color: var(--accent); }
+  .schedule-btn:disabled { opacity: 0.5; cursor: wait; }
+  .sched-confirm {
+    background: rgba(100,210,255,0.08); border: 1px solid rgba(100,210,255,0.2);
+    border-radius: 10px; padding: 10px 14px; font-size: 13px; line-height: 1.6;
+  }
+  .bubble.bot blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 10px; color: var(--text-dim);
+    font-style: italic; margin: 6px 0;
+  }
+  .bubble.bot hr {
+    border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;
+  }
+
+  /* User bubble content */
+  .bubble.user strong { color: #fff; }
+  .bubble.user code {
+    font-family: var(--mono); background: rgba(255,255,255,0.15);
+    padding: 1px 5px; border-radius: 4px; font-size: 13px;
+  }
+
+  /* Grade chip */
+  .grade-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 12px;
+    margin-left: 4px; vertical-align: middle;
+  }
+  .grade-A\+ { background: rgba(48,209,88,.2); color: var(--green); }
+  .grade-A { background: rgba(48,209,88,.2); color: var(--green); }
+  .grade-B\+, .grade-B { background: rgba(11,132,254,.2); color: #64d2ff; }
+  .grade-C\+, .grade-C { background: rgba(255,214,10,.2); color: var(--yellow); }
+  .grade-D, .grade-F { background: rgba(255,69,58,.2); color: var(--red); }
+
+  /* Typing indicator */
+  .typing { display: inline-flex; gap: 4px; padding: 4px 0; }
+  .typing span {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim);
+    animation: blink 1.4s infinite both;
+  }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%,80%,100% { opacity: .25; } 40% { opacity: 1; } }
+
+  /* Composer — iMessage style */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 8px 16px 20px;
+    flex-shrink: 0;
+  }
+  .composer {
+    max-width: 680px; margin: 0 auto;
+    display: flex; gap: 8px; align-items: flex-end;
+  }
+  .composer textarea {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    padding: 8px 16px;
+    resize: none;
+    min-height: 40px; max-height: 120px;
+    line-height: 1.35;
+    outline: none;
+    transition: border-color .15s, background .15s;
+  }
+  .composer textarea:focus {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.1);
+  }
+  .composer textarea::placeholder { color: var(--text-dim); }
+  .send-btn {
+    background: var(--accent);
+    color: #fff; border: none;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: transform .1s, opacity .15s;
+  }
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:active { transform: scale(.92); }
+  .send-btn:disabled { background: rgba(255,255,255,0.1); color: var(--text-dim); cursor: not-allowed; }
+  .send-btn svg { width: 18px; height: 18px; }
+
+  /* Hint chips */
+  .hints {
+    max-width: 680px; margin: 8px auto 0;
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .hint {
+    font-size: 12px; color: var(--accent);
+    background: rgba(11,132,254,0.1); border: 1px solid rgba(11,132,254,0.2);
+    padding: 5px 12px; border-radius: 999px; cursor: pointer;
+    transition: all .15s; white-space: nowrap;
+  }
+  .hint:hover {
+    background: rgba(11,132,254,0.2); border-color: rgba(11,132,254,0.4);
+  }
+
+  /* Scrollbar */
+  main::-webkit-scrollbar { width: 6px; }
+  main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  main::-webkit-scrollbar-track { background: transparent; }
+
+  @media (max-width: 600px) {
+    header { padding: 8px 14px; }
+    main { padding: 8px 10px 4px; }
+    footer { padding: 6px 10px 16px; }
+    .msg-row { max-width: 82%; }
+    .bubble { font-size: 14.5px; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-avatar">X</div>
+    <div class="header-info">
+      <h1>AgentX</h1>
+      <div class="sub"><span class="dot"></span>active now</div>
+    </div>
+  </header>
+
+  <main id="chat">
+    <div class="date-sep">Today</div>
+  </main>
+
+  <footer>
+    <div class="composer">
+      <textarea id="input" placeholder="Type a tweet or your idea for an X post…" rows="1"></textarea>
+      <button class="send-btn" id="send" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+    <div class="hints">
+      <span class="hint" data-text="building a fitness app for busy professionals">Generate tweets</span>
+      <span class="hint" data-text="hey I saw that your a pro editor, love the edits btw. Wanted to ask If your interested in giving me raw footage, allowing me to put it thru my retention editing software and when the video is done, you react to it. In return i could put you in the affiliate program and give you a free subscription?">Outreach example</span>
+      <span class="hint" data-text="score: I spent 18 months building features nobody asked for. Then I deleted 80% of my product. MRR went up 3x.">Score a post</span>
+      <span class="hint" data-text="help">Help</span>
+    </div>
+  </footer>
+
+<script>
+"use strict";
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+let lastSender = null;
+
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderMarkdown(md) {
+  const codeBlocks = [];
+  md = md.replace(/```([\s\S]*?)```/g, (_, code) => {
+    codeBlocks.push(code.replace(/\n$/, ""));
+    return `\x00CB${codeBlocks.length - 1}\x00`;
+  });
+
+  let html = escapeHtml(md);
+
+  html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+  html = html.replace(/^## (.+)$/gm, "<h3>$1</h3>");
+  html = html.replace(/^&gt; (.+)$/gm, "<blockquote>$1</blockquote>");
+  html = html.replace(/^---$/gm, "<hr>");
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/(?<!\w)\*([^*\n]+?)\*(?!\w)/g, "<em>$1</em>");
+  html = html.replace(/`([^`\n]+?)`/g, (m, c) => `<code>${c}</code>`);
+
+  html = html.replace(/(?:^|\n)((?:- .+(?:\n|$))+)/g, (block, items) => {
+    const lis = items.trim().split("\n").map((l) => `<li>${l.replace(/^- /, "")}</li>`).join("");
+    return `\n<ul>${lis}</ul>`;
+  });
+
+  html = html.split(/\n{2,}/).map((chunk) => {
+    if (/^\s*<(h3|ul|ol|blockquote|hr|pre)/.test(chunk)) return chunk;
+    if (!chunk.trim()) return "";
+    return `<p>${chunk.replace(/\n/g, "<br>")}</p>`;
+  }).join("\n");
+
+  html = html.replace(/\x00CB(\d+)\x00/g, (_, i) => {
+    const code = escapeHtml(codeBlocks[+i]);
+    const id = `code-${Date.now()}-${i}`;
+    return `<div class="code-block-wrap"><pre id="${id}"><code>${code}</code></pre><div class="code-actions"><button class="copy-btn" onclick="copyCode('${id}', this)">copy</button><button class="schedule-btn" onclick="schedulePost('${id}', this)">schedule</button></div></div>`;
+  });
+  return html;
+}
+
+function scrollBottom() {
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function copyCode(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "copied!";
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.textContent = "copy";
+      btn.classList.remove("copied");
+    }, 1500);
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    btn.textContent = "copied!";
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.textContent = "copy";
+      btn.classList.remove("copied");
+    }, 1500);
+  });
+}
+
+function schedulePost(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.textContent.trim();
+  if (!text) return;
+  btn.textContent = "scheduling...";
+  btn.disabled = true;
+  fetch("/api/postiz/schedule", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content: text, platform: "x" }),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.error) {
+        btn.textContent = "error";
+        setTimeout(() => { btn.textContent = "schedule"; btn.disabled = false; }, 2000);
+        return;
+      }
+      if (data.scheduled) {
+        btn.textContent = "posted ✓";
+        btn.classList.add("copied");
+        addMessage("assistant", `<div class="sched-confirm"><strong>Scheduled via Postiz ✓</strong><br>${escapeHtml(text)}<br><br><em>Time: ${data.scheduledAt}</em><br><em>Account: @${data.integration?.profile || "x"} (${data.integration?.platform || "x"})</em></div>`);
+      } else {
+        btn.textContent = "dry run ✓";
+        btn.classList.add("copied");
+        const time = data.scheduledLabel || "next best slot";
+        const reason = data.reason === "no POSTIZ_API_KEY set"
+          ? "Set <code>POSTIZ_API_KEY</code> env var to actually schedule."
+          : escapeHtml(data.reason || "");
+        addMessage("assistant", `<div class="sched-confirm"><strong>Dry run — not scheduled</strong><br>${escapeHtml(text)}<br><br><em>Would post at: ${time}</em><br><small>${reason}</small></div>`);
+      }
+      scrollBottom();
+      setTimeout(() => { btn.textContent = "schedule"; btn.disabled = false; btn.classList.remove("copied"); }, 2500);
+    })
+    .catch(() => {
+      btn.textContent = "error";
+      setTimeout(() => { btn.textContent = "schedule"; btn.disabled = false; }, 2000);
+    });
+}
+
+function addMessage(role, contentHtml) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg-row " + role;
+
+  // Track consecutive messages for tighter grouping
+  if (lastSender === role) {
+    wrap.classList.add("consecutive");
+  }
+  lastSender = role;
+
+  const bub = document.createElement("div");
+  bub.className = "bubble " + role;
+  bub.innerHTML = contentHtml;
+  wrap.appendChild(bub);
+
+  // Add read receipt for user messages
+  if (role === "user") {
+    // Mark previous user messages as not last
+  }
+
+  chat.appendChild(wrap);
+  scrollBottom();
+  return bub;
+}
+
+function addTyping() {
+  const wrap = document.createElement("div");
+  wrap.className = "msg-row bot";
+  wrap.id = "typing-msg";
+  wrap.innerHTML = '<div class="bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>';
+  chat.appendChild(wrap);
+  scrollBottom();
+}
+function removeTyping() {
+  const t = document.getElementById("typing-msg");
+  if (t) t.remove();
+}
+
+const WELCOME = `### AgentX — Engagement Engine
+
+I generate and grade X posts on the 2026 Phoenix algo.
+
+**What I can do:**
+- **Generate tweets** — paste any topic or idea and I'll create 5 variations
+- **Grade & rewrite** — paste a tweet and I'll score it + improve it
+- **Outreach posts** — describe a deal/offer and I'll generate posts that attract your target audience
+- **Self-reply engine** — type \`self-reply: <your post>\` for reply-chain plans
+
+Try a topic below or paste a tweet to grade 👇`;
+
+// Add welcome message
+setTimeout(() => {
+  addMessage("bot", renderMarkdown(WELCOME));
+}, 300);
+
+async function send(text) {
+  if (!text.trim()) return;
+  addMessage("user", escapeHtml(text).replace(/\n/g, "<br>"));
+  input.value = "";
+  autoGrow();
+  sendBtn.disabled = true;
+  addTyping();
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json();
+    removeTyping();
+    const md = (data.reply && data.reply.markdown) || "_(no reply)_";
+    addMessage("bot", renderMarkdown(md));
+  } catch (e) {
+    removeTyping();
+    addMessage("bot", `<p>Something went wrong: ${escapeHtml(String(e))}</p>`);
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+function autoGrow() {
+  input.style.height = "auto";
+  input.style.height = Math.min(120, input.scrollHeight) + "px";
+}
+
+sendBtn.addEventListener("click", () => send(input.value));
+input.addEventListener("input", autoGrow);
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    send(input.value);
+  }
+});
+
+document.querySelectorAll(".hint").forEach((h) => {
+  h.addEventListener("click", () => {
+    input.value = h.dataset.text;
+    autoGrow();
+    send(h.dataset.text);
+  });
+});
+
+input.focus();
+</script>
+</body>
+</html>

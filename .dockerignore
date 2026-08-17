@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+*.md
+_test_*.js
+_debug*.js
+reference/
+analytics_data.json
+feedback_queue.json
+learning_state.json
