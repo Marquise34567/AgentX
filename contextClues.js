@@ -291,8 +291,52 @@ function inferFromMorphemes(morphemes) {
   }
 
   // If we have a modifier, enhance the benefit
+  // But don't produce awkward combinations like "AI automatic content" or "in bulk smaller files"
   if (modifier && benefit) {
-    benefit = benefitPrefix + benefit;
+    // Don't prepend if benefit already starts with a modifier-like word
+    if (benefitPrefix && !benefit.startsWith(benefitPrefix.trim())) {
+      if (!/^automatic|^auto|^AI|^smart|^instant|^in bulk|^intelligently|^professionally/i.test(benefit)) {
+        // Only prepend "automatically " and "AI " — these combine well
+        // Don't prepend "intelligently ", "in bulk ", "professionally " — these don't
+        if (/^(automatically |AI )/.test(benefitPrefix)) {
+          benefit = benefitPrefix + benefit;
+        }
+        // For other modifiers, append the modifier meaning at the end instead
+        else if (modifier === "smart") {
+          // Don't double up comparatives — "smarter faster writing" is awkward
+          if (/^(faster|better|easier|cheaper|simpler) /i.test(benefit)) {
+            benefit = `smarter ${benefit.replace(/^(faster|better|easier|cheaper|simpler) /i, "")}`;
+          } else {
+            benefit = `smarter ${benefit}`;
+          }
+        }
+        else if (modifier === "bulk" || modifier === "batch") {
+          benefit = `${benefit} in bulk`;
+        }
+        else if (modifier === "pro" || modifier === "professional") {
+          benefit = `professional ${benefit}`;
+        }
+        else if (modifier === "easy" || modifier === "simple") {
+          benefit = `easier ${benefit.replace(/^faster |^better /, "")}`;
+        }
+        else if (modifier === "free") {
+          benefit = `free ${benefit.replace(/^faster |^better /, "")}`;
+        }
+        else if (modifier === "instant") {
+          benefit = `instant ${benefit.replace(/^faster |^better /, "")}`;
+        }
+      }
+    }
+  }
+  // If the benefit is still generic ("automatic content"), replace with something better
+  if (benefit && /^(automatic content|generate content|AI automatic content)$/i.test(benefit)) {
+    if (medium) {
+      benefit = `automatic ${medium}s`;
+    } else if (action) {
+      benefit = `faster ${action}`;
+    } else {
+      benefit = "save time";
+    }
   }
   if (modifier && comparative) {
     // Keep the comparative from the modifier if it's stronger
