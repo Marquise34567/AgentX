@@ -261,6 +261,35 @@ function inferFromMorphemes(morphemes) {
     else if (medium === "demo") action = "create demos";
   }
 
+  // If we have a medium AND an action, refine the action to use the medium
+  // e.g. "generate content" + "subtitle" → "generate subtitles"
+  if (medium && action) {
+    if (action === "generate content" || action === "generate") {
+      if (medium === "subtitle") action = "generate subtitles";
+      else if (medium === "caption") action = "generate captions";
+      else if (medium === "video") action = "generate videos";
+      else if (medium === "audio") action = "generate audio";
+      else if (medium === "image" || medium === "photo") action = "generate images";
+      else if (medium === "text") action = "generate text";
+      else if (medium === "music") action = "generate music";
+      else if (medium === "voiceover") action = "generate voiceovers";
+      else if (medium === "clip") action = "generate clips";
+      else if (medium === "post" || medium === "tweet") action = "generate posts";
+      else if (medium === "email") action = "generate emails";
+      else if (medium === "newsletter") action = "generate newsletters";
+      else if (medium === "blog") action = "generate blog posts";
+      else action = `generate ${medium}s`;
+    }
+    if (action === "write content" || action === "write") {
+      if (medium === "subtitle") action = "write subtitles";
+      else if (medium === "caption") action = "write captions";
+      else if (medium === "email") action = "write emails";
+      else if (medium === "newsletter") action = "write newsletters";
+      else if (medium === "blog") action = "write blog posts";
+      else if (medium === "post" || medium === "tweet") action = "write posts";
+    }
+  }
+
   // If we have a modifier, enhance the benefit
   if (modifier && benefit) {
     benefit = benefitPrefix + benefit;

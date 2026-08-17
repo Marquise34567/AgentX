@@ -74,7 +74,7 @@ const VIRAL_FORMATS = {
     ],
     bodyTemplates: [
       "here's what happened:\n\n{failure_detail}\n\nI thought {wrong_assumption}.\n\nthe reality: {reality}.\n\nthe fix: {fix}.",
-      "for {timeframe} I was {wrong_action}.\n\nthen I {pivot}.\n\n{result}.",
+      "for {timeframe} I was {wasted_action}.\n\nthen I {pivot}.\n\n{result}.",
       "the messy reality:\n\n{failure_detail}\n\nwhat I learned: {lesson}.",
     ],
     closerTemplates: [
@@ -170,7 +170,7 @@ const VIRAL_FORMATS = {
     ],
     closerTemplates: [
       "steal this.",
-      "what's your {metric}?",
+      "what's your number?",
       "the lesson is transferable.",
       "apply this to your {category}.",
     ],
@@ -349,11 +349,11 @@ const VIRAL_FORMATS = {
     bodyTemplates: [
       "the most common mistake:\n\n{mistake}\n\nthe fix: {fix}.",
       "here's what I found:\n\n{finding_1}\n\n{finding_2}\n\nthe lesson: {lesson}.",
-      "{number} out of {total} had this problem:\n\n{problem}\n\nhere's how to fix it: {fix}.",
+      "most of them had this problem:\n\n{problem}\n\nhere's how to fix it: {fix}.",
     ],
     closerTemplates: [
       "steal this.",
-      "what's your {category} mistake?",
+      "what's your biggest mistake?",
       "apply this to your {asset}.",
       "the lesson is transferable.",
     ],
@@ -412,7 +412,7 @@ const VIRAL_FORMATS = {
       "the number isn't the point.\n\nthe point: {takeaway}.",
     ],
     closerTemplates: [
-      "what's your {metric}?",
+      "what's your number?",
       "the takeaway is transferable.",
       "steal this.",
       "build in public.",
@@ -472,7 +472,7 @@ const VIRAL_FORMATS = {
       "traffic: {traffic}\ntrials: {trials}\nchurn risk: {churn}\n\nwhat surprised me: {surprise}.",
     ],
     closerTemplates: [
-      "what's your {metric}?",
+      "what's your number?",
       "the data is the lesson.",
       "build in public.",
       "what would you do differently?",
@@ -658,13 +658,17 @@ function generateFromFormat(formatId, analysis) {
   const fill = (template) => {
     return template
       .replace(/\{topic\}/g, act)
+      .replace(/\{project\}/g, product)
+      .replace(/\{story\}/g, `I was ${act} manually for hours. then I built ${product}. now it takes seconds.`)
+      .replace(/\{failure_detail\}/g, pick([`I spent weeks ${act} manually. it was unsustainable.`, `users were dropping off because the workflow was too complex.`, `I shipped a feature nobody asked for. crickets.`]))
+      .replace(/\{problem\}/g, pick([`too many manual steps`, `overcomplicated workflows`, `no clear before/after`, `too many settings`]))
       .replace(/\{audience\}/g, aud)
       .replace(/\{product\}/g, product)
       .replace(/\{action\}/g, action || "edit")
       .replace(/\{belief\}/g, `AI will replace ${aud}`)
       .replace(/\{common_action\}/g, `${act} manually`)
-      .replace(/\{metric\}/g, "time")
-      .replace(/\{category\}/g, analysis.audienceProfile?.id || "editing")
+      .replace(/\{metric\}/g, pick(["trials", "users", "signups", "exports", "demos"]))
+      .replace(/\{category\}/g, analysis.audience || "editing")
       .replace(/\{number\}/g, String(Math.floor(Math.random() * 50) + 5))
       .replace(/\{timeframe\}/g, pick(["hours", "days", "weeks", "months"]))
       .replace(/\{cost\}/g, pick(["3 weeks", "a month", "2 months", "$500", "100 hours"]))
