@@ -175,52 +175,68 @@ function analyzeTopic(input) {
   // "I built a cheaper way for founders to record their founder demos"
   // "I made a tool that helps creators edit faster"
   // "I created an app that automates invoice generation"
+  // BUT NOT: "I built a saas the other night" (that's a personal milestone, not a product announcement)
+  // A real product announcement has a product DESCRIPTION after the verb:
+  //   - "a tool that helps..." / "an app that..." / "a cheaper way to..."
+  //   - "a platform for..." / "a service that..."
+  // A personal statement just has a noun + casual context:
+  //   - "a saas the other night" / "an app yesterday" / "a tool last week"
   const productMatch = lower.match(/\bi\s+(?:built|made|created|developed|shipped|launched|designed)\s+(?:a|an)?\s*(.+)/i);
   if (productMatch) {
-    result.type = "product_announcement";
     const rest = productMatch[1].trim();
+    // Check if this is a real product announcement (has a description) or just a personal statement
+    const hasProductDescription = /\b(?:that|which|for|to|way|approach|method|tool|alternative|solution|platform|app|service|system)\b/i.test(rest);
+    const hasCasualTimePhrase = /\b(?:the other day|the other night|yesterday|last week|last night|last month|last year|a few days ago|a while ago|recently|tonight|today|this morning|this week|this month)\b/i.test(rest);
+    const isShortPersonalStatement = rest.split(/\s+/).length <= 4 && !hasProductDescription;
 
-    // Extract comparative adjective (cheaper, faster, easier, simpler, better)
-    const compMatch = rest.match(/\b(cheaper|faster|easier|simpler|better|free|affordable|smarter|quicker|cleaner|lighter|smaller|bigger|more\s+\w+)\s+(?:way|approach|method|tool|alternative|solution|platform|app)\b/i);
-    if (compMatch) {
-      result.comparative = compMatch[1];
+    if (hasProductDescription && !hasCasualTimePhrase) {
+      // This is a real product announcement — proceed with product analysis
+      result.type = "product_announcement";
+
+      // Extract comparative adjective (cheaper, faster, easier, simpler, better)
+      const compMatch = rest.match(/\b(cheaper|faster|easier|simpler|better|free|affordable|smarter|quicker|cleaner|lighter|smaller|bigger|more\s+\w+)\s+(?:way|approach|method|tool|alternative|solution|platform|app)\b/i);
+      if (compMatch) {
+        result.comparative = compMatch[1];
+      }
+
+      // Extract audience: "for founders to..." / "for creators who..." / "for teams that..."
+      const audienceMatch = rest.match(/\bfor\s+(\w+(?:\s+\w+){0,2})\s+(?:to|who|that|which)\b/i);
+      if (audienceMatch) {
+        // Keep the original form (plural or singular) — the hooks will handle grammar
+        result.audience = audienceMatch[1].trim();
+        result.audienceSingular = singularize(result.audience);
+      }
+
+      // Extract action: "to record their founder demos" / "to edit faster"
+      const actionMatch = rest.match(/\bto\s+(.+?)(?:\.|$)/i);
+      if (actionMatch) {
+        let act = actionMatch[1].trim();
+        // Clean up possessives from action
+        act = act.replace(/\b(?:their|your|his|her|its)\s+/gi, "");
+        // Turn "record founder demos" into a gerund for natural phrasing
+        result.action = act;
+        result.actionGerund = toGerund(act);
+      }
+
+      // Build the subject — what was built
+      result.subject = rest;
+      result.entity = rest;
+
+      // Build the outcome based on comparative + action
+      if (result.comparative && result.action) {
+        result.outcome = buildOutcome(result.comparative, result.action, result.audience);
+      } else if (result.action) {
+        result.outcome = result.action;
+      } else {
+        result.outcome = rest;
+      }
+
+      // Extract keywords
+      result.keywords = extractKeywords(rest);
+      return finalizeAnalysis(result);
     }
-
-    // Extract audience: "for founders to..." / "for creators who..." / "for teams that..."
-    const audienceMatch = rest.match(/\bfor\s+(\w+(?:\s+\w+){0,2})\s+(?:to|who|that|which)\b/i);
-    if (audienceMatch) {
-      // Keep the original form (plural or singular) — the hooks will handle grammar
-      result.audience = audienceMatch[1].trim();
-      result.audienceSingular = singularize(result.audience);
-    }
-
-    // Extract action: "to record their founder demos" / "to edit faster"
-    const actionMatch = rest.match(/\bto\s+(.+?)(?:\.|$)/i);
-    if (actionMatch) {
-      let act = actionMatch[1].trim();
-      // Clean up possessives from action
-      act = act.replace(/\b(?:their|your|his|her|its)\s+/gi, "");
-      // Turn "record founder demos" into a gerund for natural phrasing
-      result.action = act;
-      result.actionGerund = toGerund(act);
-    }
-
-    // Build the subject — what was built
-    result.subject = rest;
-    result.entity = rest;
-
-    // Build the outcome based on comparative + action
-    if (result.comparative && result.action) {
-      result.outcome = buildOutcome(result.comparative, result.action, result.audience);
-    } else if (result.action) {
-      result.outcome = result.action;
-    } else {
-      result.outcome = rest;
-    }
-
-    // Extract keywords
-    result.keywords = extractKeywords(rest);
-    return finalizeAnalysis(result);
+    // If it's NOT a real product announcement (just a personal statement like
+    // "i built a saas the other night"), fall through to milestone detection below.
   }
 
   // --- Detect "X gives you Y" / "X helps you Z" product descriptions ---
@@ -249,16 +265,39 @@ function analyzeTopic(input) {
     return finalizeAnalysis(result);
   }
 
-  // --- Detect milestone: "I started X", "I launched X", "I opened X" ---
+  // --- Detect milestone: "I started X", "I launched X", "I built X", "I made X" ---
+  // This catches personal statements like "i built a saas the other night"
+  // that are NOT product announcements (no product description, just a personal action)
   const milestoneMatch = lower.match(
-    /\bi\s+(started|launched|opened|began|kicked off|rolled out|released|published)\s+(.+)/i
+    /\bi\s+(started|launched|opened|began|kicked off|rolled out|released|published|built|made|created|developed|shipped|designed)\s+(?:a|an|the)?\s*(.+)/i
   );
   if (milestoneMatch) {
     result.type = "milestone";
     result.action = milestoneMatch[1];
-    result.subject = milestoneMatch[2].trim();
-    result.entity = result.subject;
-    result.keywords = extractKeywords(result.subject);
+    // Clean up the subject — remove trailing time phrases like "the other night"
+    let subjectRaw = milestoneMatch[2].trim();
+    // Strip casual time phrases from the subject
+    subjectRaw = subjectRaw.replace(/\s+(?:the other day|the other night|yesterday|last week|last night|last month|last year|a few days ago|a while ago|recently|tonight|today|this morning|this week|this month)$/i, "");
+    // Strip leading articles
+    subjectRaw = subjectRaw.replace(/^(?:a|an|the)\s+/i, "");
+    result.subject = subjectRaw;
+    result.entity = subjectRaw;
+    result.keywords = extractKeywords(subjectRaw);
+    // Try to match audience from the subject (e.g., "saas" → SaaS founders)
+    const subjectLower = subjectRaw.toLowerCase();
+    if (/\bsaas\b/i.test(subjectLower)) {
+      const audProfile = getAudience("saasFounders");
+      if (audProfile) {
+        result.audience = audProfile.name;
+        result.audienceProfile = audProfile;
+      }
+    } else if (/\b(app|application|software|tool|platform)\b/i.test(subjectLower)) {
+      const audProfile = getAudience("softwareDevelopers");
+      if (audProfile) {
+        result.audience = audProfile.name;
+        result.audienceProfile = audProfile;
+      }
+    }
     return finalizeAnalysis(result);
   }
 
@@ -328,9 +367,28 @@ function singularize(word) {
 function toGerund(action) {
   // "record founder demos" → "recording founder demos"
   // "edit faster" → "editing faster"
+  // "built" → "building" (irregular)
   const words = action.split(/\s+/);
   if (words.length === 0) return action;
   const first = words[0];
+
+  // Irregular verbs — past tense → gerund
+  const irregulars = {
+    built: "building", made: "making", created: "creating", developed: "developing",
+    shipped: "shipping", launched: "launching", designed: "designing",
+    started: "starting", opened: "opening", began: "beginning",
+    released: "releasing", published: "publishing",
+    failed: "failing", lost: "losing", wasted: "wasting",
+    sold: "selling", spent: "spending", tried: "trying",
+    learned: "learning", found: "finding", got: "getting",
+    quit: "quitting", hit: "hitting", reached: "reaching",
+    grew: "growing", deleted: "deleting", completed: "completing",
+  };
+  if (irregulars[first.toLowerCase()]) {
+    const gerund = irregulars[first.toLowerCase()];
+    return gerund + (words.length > 1 ? " " + words.slice(1).join(" ") : "");
+  }
+
   let gerund;
   if (first.endsWith("e") && !first.endsWith("ee") && !/(ie|oe|ye)$/.test(first)) {
     gerund = first.slice(0, -1) + "ing";
@@ -345,6 +403,22 @@ function toGerund(action) {
     gerund = first + "ing";
   }
   return gerund + (words.length > 1 ? " " + words.slice(1).join(" ") : "");
+}
+
+// Convert past tense verbs to base form: "built" → "build", "made" → "make"
+function toBaseForm(verb) {
+  const irregulars = {
+    built: "build", made: "make", created: "create", developed: "develop",
+    shipped: "ship", launched: "launch", designed: "design",
+    started: "start", opened: "open", began: "begin",
+    released: "release", published: "publish",
+    failed: "fail", lost: "lose", wasted: "waste",
+    sold: "sell", spent: "spend", tried: "try",
+    learned: "learn", found: "find", got: "get",
+    quit: "quit", hit: "hit", reached: "reach",
+    grew: "grow", deleted: "delete", completed: "complete",
+  };
+  return irregulars[verb.toLowerCase()] || verb;
 }
 
 // ---------------------------------------------------------------------------
@@ -510,9 +584,29 @@ function generateTopicHooks(analysis) {
   }
 
   if (type === "milestone" && subject) {
-    hooks.push(`I just ${analysis.action} ${subject}.`);
+    // Personal milestone hooks — grounded in what the user actually did
+    const action = analysis.action || "built";
+    // Convert past tense to base form for phrases like "should build"
+    const baseForm = toBaseForm(action);
+    const gerund = toGerund(action);
+    hooks.push(`I just ${action} ${subject}.`);
     hooks.push(`day 1 of ${subject}.`);
     hooks.push(`${subject}. here we go.`);
+    hooks.push(`nobody told me how hard ${subject} would be.`);
+    hooks.push(`I ${action} ${subject}. here's what I learned.`);
+    hooks.push(`the hardest part about ${subject} isn't what you think.`);
+    hooks.push(`I spent more time ${gerund} ${subject} than I expected.`);
+    hooks.push(`${subject} is live. here's what nobody tells you.`);
+    // If we have an audience profile, add audience-specific milestone hooks
+    if (analysis.audienceProfile) {
+      const ap = analysis.audienceProfile;
+      const audS = analysis.audienceSingular || singularize(analysis.audience || ap.name);
+      hooks.push(`every ${audS} should ${baseForm} ${subject} at least once.`);
+      hooks.push(`I ${action} ${subject}. other ${ap.name} are doing it wrong.`);
+      if (ap.metrics.length >= 1) {
+        hooks.push(`I ${action} ${subject}. my ${ap.metrics[0]} is already moving.`);
+      }
+    }
   }
 
   // --- Audience-specific hooks using the audience database ---
@@ -632,6 +726,43 @@ function generateOutcomeBodies(analysis) {
     bodies.push(`the outcome: ${action}.`);
     bodies.push(`what it does: ${action}. that's the whole pitch.`);
     bodies.push(`${entity} → ${action}. simple.`);
+  }
+
+  if (type === "milestone" && subject) {
+    const action = analysis.action || "built";
+    const baseForm = toBaseForm(action);
+    const gerund = toGerund(action);
+    bodies.push(`here's what nobody tells you about ${subject}:`);
+    bodies.push(`the hardest part wasn't ${gerund} ${subject}. it was starting.`);
+    bodies.push(`I thought ${subject} would be the hard part. it wasn't.`);
+    bodies.push(`what I learned from ${gerund} ${subject}:`);
+    bodies.push(`${subject} taught me more in a week than a month of planning.`);
+    bodies.push(`the plan was simple. ${subject} had other ideas.`);
+    bodies.push(`I ${action} ${subject} in a weekend. here's what I'd do differently.`);
+    bodies.push(`3 things I got wrong about ${subject}:`);
+    bodies.push(`the biggest mistake I made ${gerund} ${subject}:`);
+    bodies.push(`nobody warned me about this part of ${subject}:`);
+    bodies.push(`I almost quit ${subject} 3 times. here's why I didn't.`);
+    bodies.push(`the unexpected cost of ${subject}:`);
+    // If we have an audience profile, add audience-specific milestone bodies
+    if (analysis.audienceProfile) {
+      const ap = analysis.audienceProfile;
+      const audS = analysis.audienceSingular || singularize(analysis.audience || ap.name);
+      bodies.push(`every ${audS} should ${baseForm} ${subject} at least once. here's why.`);
+      bodies.push(`other ${ap.name} will recognize this: ${subject} changes everything.`);
+      bodies.push(`I ${action} ${subject} because ${ap.painPoints[0] || "the existing tools weren't good enough"}.`);
+      if (ap.metrics.length >= 1) {
+        bodies.push(`I ${action} ${subject}. my ${ap.metrics[0]} already moved.`);
+        bodies.push(`the first ${ap.metrics[0]} number that proved ${subject} was worth it:`);
+      }
+      if (ap.painPoints.length >= 1) {
+        bodies.push(`${subject} solved ${ap.painPoints[0]}. not on purpose. but it did.`);
+        bodies.push(`I built ${subject} to fix ${ap.painPoints[0]}. it fixed more than that.`);
+      }
+      if (ap.goals.length >= 1) {
+        bodies.push(`${subject} isn't about ${ap.goals[0]}. it's about not giving up.`);
+      }
+    }
   }
 
   // --- Audience-specific outcome bodies ---

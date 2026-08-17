@@ -354,11 +354,24 @@ function inferFromMorphemes(morphemes) {
 
   if (!action) return null;
 
+  // Fix benefit construction — "better build SaaS products" is grammatically broken.
+  // If the action starts with a verb, use "faster ${action}" or "${comparative} ${noun}" instead.
+  if (!benefit) {
+    // If action is a verb phrase (starts with a verb), use "faster" not "better"
+    if (/^(build|make|create|edit|write|generate|design|record|compress|convert|upload|schedule|post|publish|deploy|code|ship|launch|optimize|automate|scrape|parse|summarize|translate|dub|narrate|animate|grade|mix|master|track|monitor|analyze|clip|cut|render|caption|subtitle)\b/i.test(action)) {
+      benefit = `faster ${action}`;
+      comparative = comparative || "faster";
+    } else {
+      benefit = `better ${action}`;
+      comparative = comparative || "better";
+    }
+  }
+
   return {
     action,
     audience,
     category,
-    benefit: benefit || `better ${action}`,
+    benefit,
     comparative: comparative || "better",
     modifier,
     medium,
@@ -372,6 +385,19 @@ function inferFromMorphemes(morphemes) {
 function understandProduct(input) {
   const text = input.trim();
   const lower = text.toLowerCase();
+
+  // 0. Reject personal statements — "i built a saas the other night" is NOT a product name.
+  // The context-clue engine is for understanding PRODUCT NAMES (autoeditor, screen recorder,
+  // ai caption generator) — not personal stories or milestones.
+  // If the input starts with "I" and has a personal verb, it's a statement, not a product.
+  if (/^\s*i\s+(built|made|created|launched|shipped|started|quit|hit|reached|grew|sold|deleted|spent|tried|failed|learned|realized|discovered|found|got|made|built)\b/i.test(lower)) {
+    return null;
+  }
+  // Also reject if the input is a full sentence (6+ words with personal pronouns)
+  const wordCount = lower.split(/\s+/).length;
+  if (wordCount >= 6 && /\b(i|i'm|i've|i just|i finally)\b/i.test(lower) && /\b(built|made|created|launched|shipped|started|quit|hit|reached|grew|sold|deleted|spent|tried|failed|learned|realized|discovered|found|got|read|watched|finished|completed|began)\b/i.test(lower)) {
+    return null;
+  }
 
   // 1. Check context patterns first ("X for Y", "tool that X", etc.)
   for (const cp of CONTEXT_PATTERNS) {

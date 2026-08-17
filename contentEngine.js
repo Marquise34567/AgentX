@@ -1378,8 +1378,12 @@ function generateTopicPosts(parsed, count = 5) {
   // --- STAGE 1: Generate candidates using the compositional template bank ---
   // The template bank has 1,257,298 unique combinations across 10 context types.
   // Each call uses a random seed so the same topic never produces the same posts.
+  // BUT skip the template bank for personal statements — its hooks just echo the
+  // raw input (e.g., "i built a saas the other night.") which is worse than not
+  // having them. The topic analyzer handles personal statements better.
+  const isPersonalStatementInput = /\b(i|i'm|i've|i just|i finally)\b/i.test(topic) && /\b(built|made|created|launched|shipped|started|quit|hit|reached|grew|sold|deleted|spent|tried|failed|learned|realized|discovered|found|got|read|watched|finished|completed|began)\b/i.test(topic);
   const { generateCompositional } = require("./templateBank");
-  const pool = generateCompositional(topic, topicType, count, Date.now() + Math.floor(Math.random() * 1000000));
+  const pool = isPersonalStatementInput ? [] : generateCompositional(topic, topicType, count, Date.now() + Math.floor(Math.random() * 1000000));
 
   // --- STAGE 1b: Generate topic-aware candidates using the topic analyzer ---
   // The topic analyzer extracts the MEANING of the topic (audience, action,
@@ -1394,6 +1398,11 @@ function generateTopicPosts(parsed, count = 5) {
       const topicClosers = generateTopicClosers(analysis);
       // Combine hooks × bodies × closers into posts
       // Also include the original topic as a line in some posts (like the template bank does)
+      // BUT only if the topic is a short product name — NOT a personal statement like
+      // "i built a saas the other night" (echoing that verbatim is worse than not having it)
+      const isPersonalStatement = /\b(i|i'm|i've|i just|i finally)\b/i.test(topic) && /\b(built|made|created|launched|shipped|started|quit|hit|reached|grew|sold|deleted|spent|tried|failed|learned|realized|discovered|found|got|read|watched|finished|completed|began)\b/i.test(topic);
+      const shouldPrependTopic = !isPersonalStatement && topic.split(/\s+/).length <= 5;
+
       for (let h = 0; h < Math.min(topicHooks.length, 10); h++) {
         const hook = topicHooks[h];
         for (let b = 0; b < Math.min(topicBodies.length, 5); b++) {
@@ -1403,9 +1412,11 @@ function generateTopicPosts(parsed, count = 5) {
           // Format 1: hook + body + closer
           const text1 = closer ? `${hook}\n\n${body}\n\n${closer}` : `${hook}\n\n${body}`;
           pool.push({ text: text1, type: "topic_analyzer", reasoning: `topic-aware: ${analysis.type} for ${analysis.audience || "general audience"}` });
-          // Format 2: topic line + hook + body (includes the topic verbatim like template bank)
-          const text2 = closer ? `${topic}\n\n${hook}\n\n${body}\n\n${closer}` : `${topic}\n\n${hook}\n\n${body}`;
-          pool.push({ text: text2, type: "topic_analyzer", reasoning: `topic-aware (with topic line): ${analysis.type} for ${analysis.audience || "general audience"}` });
+          // Format 2: topic line + hook + body (only for short product names, not personal statements)
+          if (shouldPrependTopic) {
+            const text2 = closer ? `${topic}\n\n${hook}\n\n${body}\n\n${closer}` : `${topic}\n\n${hook}\n\n${body}`;
+            pool.push({ text: text2, type: "topic_analyzer", reasoning: `topic-aware (with topic line): ${analysis.type} for ${analysis.audience || "general audience"}` });
+          }
         }
       }
     }
@@ -1448,13 +1459,20 @@ function generateTopicPosts(parsed, count = 5) {
   filtered.sort((a, b) => b.composite - a.composite);
 
   // --- STAGE 5: Deduplicate by full content similarity (not just first line) ---
+  // Also deduplicate by BODY line — so posts with different hooks but the same
+  // body don't all make it through (e.g., 4 posts with "here's what nobody tells
+  // you about saas:" as the body but different hooks)
   const seen = new Set();
+  const seenBodies = new Set();
   const unique = [];
   for (const p of filtered) {
     const lines = p.text.split("\n").filter(l => l.trim());
     const key = (lines[0] + " " + (lines[1] || "")).toLowerCase().slice(0, 60);
-    if (!seen.has(key)) {
+    // Also check the body (2nd line or 3rd line depending on structure)
+    const bodyKey = (lines[1] || lines[2] || "").toLowerCase().slice(0, 60);
+    if (!seen.has(key) && !seenBodies.has(bodyKey)) {
       seen.add(key);
+      seenBodies.add(bodyKey);
       unique.push(p);
     }
     if (unique.length >= count * 3) break;
