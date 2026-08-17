@@ -664,7 +664,8 @@ async function send(text) {
     addMessage("bot", renderMarkdown(md));
   } catch (e) {
     removeTyping();
-    addMessage("bot", `<p><strong>Connection error.</strong> Make sure your AgentX server is running at <code>${escapeHtml(API_URL)}</code></p><p>Click the settings icon to change the API URL.</p>`);
+    const errMsg = String(e).replace(/TypeError:/g, "").trim();
+    addMessage("bot", `<p><strong>Connection error.</strong></p><p>Make sure your AgentX server is running at <code>${escapeHtml(API_URL)}</code></p><p><small>${escapeHtml(errMsg)}</small></p><p>Click the gear icon above to change the API URL.</p>`);
   } finally {
     sendBtn.disabled = false;
     input.focus();
